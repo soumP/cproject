@@ -14,9 +14,9 @@ function Chart({ label, points, markAt, markLabel }: Extract<VisualData, { kind:
     <figure className="viz viz-chart">
       <figcaption>{label}</figcaption>
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label}>
-        <path d={path} fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinejoin="round" />
+        <path className="viz-line" pathLength={1} d={path} fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinejoin="round" />
         {markAt !== undefined && (
-          <g>
+          <g className="viz-marker">
             <line x1={x(markAt)} x2={x(markAt)} y1={pad} y2={h - pad} stroke="var(--danger)" strokeDasharray="4 3" />
             <circle cx={x(markAt)} cy={y(points[markAt])} r="4.5" fill="var(--danger)" />
             {markLabel && (

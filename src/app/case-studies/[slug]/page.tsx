@@ -5,6 +5,7 @@ import { caseStudies, getCaseStudy, getFramework, getTrack } from "@/content";
 import { PanelStrip } from "@/components/Panel";
 import { PracticeFlow } from "@/components/PracticeFlow";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { StoryPlayer } from "@/components/StoryPlayer";
 
 type Params = Promise<{ slug: string }>;
 
@@ -27,7 +28,7 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
   const next = caseStudies[(idx + 1) % caseStudies.length];
 
   return (
-    <article className="case container-narrow">
+    <article className="case container-narrow" data-story>
       <header className="case-head">
         <Link href="/#case-studies" className="back">
           ← All case studies
@@ -47,13 +48,15 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
         <p className="muted small">{cs.company}</p>
       </header>
 
-      <section aria-label="The setup">
+      <StoryPlayer />
+
+      <section aria-label="The setup" data-chapter>
         <h2 className="chapter">The setup</h2>
         <PanelStrip panels={cs.setup} />
       </section>
 
       <PracticeFlow slug={cs.slug} question={cs.prompt.question} hints={cs.prompt.hints} rubric={cs.rubric}>
-        <section aria-label="The breakdown">
+        <section aria-label="The breakdown" data-chapter>
           <h2 className="chapter">The breakdown</h2>
           {cs.breakdown.map((step) => {
             const fw = step.framework ? getFramework(step.framework) : undefined;
@@ -73,7 +76,7 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
           })}
         </section>
 
-        <section aria-label={cs.outcome.heading}>
+        <section aria-label={cs.outcome.heading} data-chapter>
           <h2 className="chapter">{cs.outcome.heading}</h2>
           <PanelStrip panels={cs.outcome.panels} />
           {cs.outcome.sources && (
@@ -81,7 +84,7 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
           )}
         </section>
 
-        <section className="takeaway" aria-labelledby="takeaway-title">
+        <section className="takeaway" aria-labelledby="takeaway-title" data-unit="block">
           <h2 id="takeaway-title" className="chapter">
             Interview takeaway
           </h2>

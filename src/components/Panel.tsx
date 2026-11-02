@@ -9,7 +9,7 @@ export function Panel({ panel }: { panel: PanelData }) {
   const framework = callout?.framework ? getFramework(callout.framework) : undefined;
 
   return (
-    <div className={`panel panel-${speaker}`}>
+    <div className={`panel panel-${speaker}`} data-unit="panel">
       {speaker === "narrator" ? (
         <p className="caption">{text}</p>
       ) : (

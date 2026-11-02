@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import type { RubricItem } from "@/content/types";
+import { AIFeedback } from "./AIFeedback";
 import { clearAttempt, loadAttempt, saveAttempt } from "./storage";
 
 const MIN_WORDS = 30;
@@ -59,7 +60,7 @@ export function PracticeFlow({ slug, question, hints, rubric, children }: Props)
 
   return (
     <>
-      <section className="your-turn" aria-labelledby="your-turn-title">
+      <section className="your-turn" aria-labelledby="your-turn-title" data-unit="gate">
         <div className="your-turn-head">
           <span className="stamp">Your turn</span>
           <h2 id="your-turn-title">{question}</h2>
@@ -122,7 +123,7 @@ export function PracticeFlow({ slug, question, hints, rubric, children }: Props)
         <>
           <div id="breakdown">{children}</div>
 
-          <section className="score-card" aria-labelledby="score-title">
+          <section className="score-card" aria-labelledby="score-title" data-unit="block">
             <h2 id="score-title">Score yourself</h2>
             <p className="muted">
               Re-read your answer and tick what you covered. Be strict: interviewers will be.
@@ -160,6 +161,7 @@ export function PracticeFlow({ slug, question, hints, rubric, children }: Props)
                 </p>
               </div>
             </div>
+            <AIFeedback slug={slug} answer={answer} rubric={rubric} />
           </section>
         </>
       )}
