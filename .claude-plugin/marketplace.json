@@ -1,0 +1,11 @@
+{
+  "name": "soump-tools",
+  "owner": { "name": "soumP" },
+  "plugins": [
+    {
+      "name": "ai-product-team",
+      "source": "./plugins/ai-product-team",
+      "description": "An AI product team for any repo: Lead, Designer, Architect, 3 Devs, QA and Releaser, with shared board/decisions/brief files. You are the PM and give the final yes."
+    }
+  ]
+}
