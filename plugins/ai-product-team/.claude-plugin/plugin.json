@@ -1,6 +1,6 @@
 {
   "name": "ai-product-team",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Every agent has one job. You are the PM; the main session is the Lead; Designer, Architect, Devs, QA and a Releaser do the work. Shared files are the team's memory.",
   "author": { "name": "soumP" }
 }
