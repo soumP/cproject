@@ -6,6 +6,9 @@ Every agent reads this file before working. The PM can edit it any time.
 - **Stack:** Next.js 15 (App Router), React 19, TypeScript. AI feedback via the Anthropic SDK + zod.
 - **Where the code lives:** `src/app` (routes), `src/components`, `src/content` (typed case studies,
   frameworks, tracks; see `src/content/types.ts`), `src/lib`.
+- **Who it's for:** people preparing for PM interviews, and early-career PMs
+- **How it makes money (or plans to):** free for now; newsletter audience (see README roadmap)
+- **Known competitors:** growth.design (comic case studies; the inspiration), Exponent, RocketBlocks, Lewis Lin's books
 - **Conventions:** see `README.md` (adding case studies, visuals, speakers, `fictional: true`, sourced facts only).
 
 ## Commands

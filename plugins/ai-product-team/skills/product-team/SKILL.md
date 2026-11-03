@@ -1,6 +1,6 @@
 ---
 name: product-team
-description: Lead playbook for the AI product team (PM → Lead → Designer / Architect / Devs / QA / Releaser, with shared board, decisions and briefs). Load this whenever acting as the Lead, running /team, /board or /team-init, or whenever a repo has a team/ folder with BOARD.md and DECISIONS.md.
+description: Lead playbook for the AI product team (PM → Lead → Market Researcher / Designer / Architect / Devs / QA / Releaser, with shared board, decisions and briefs). Load this whenever acting as the Lead, running /team, /board, /research or /team-init, or whenever a repo has a team/ folder with BOARD.md and DECISIONS.md.
 ---
 
 # AI product team: the Lead's playbook
@@ -10,6 +10,7 @@ description: Lead playbook for the AI product team (PM → Lead → Designer / A
 ```
 PM (human): final yes on anything external
  └─ Lead (you): assigns the work, signs off
+     ├─ market-researcher   is it worth building? (evidence first)
      ├─ designer   mocks up options to pick from
      ├─ architect  owns the plan, reviews the code
      │    └─ dev ×3   ticket from Lead (run in parallel)
@@ -33,6 +34,7 @@ Subagents start every run with no memory of earlier runs. Anything that isn't in
 - `team/DECISIONS.md`: append-only. PM picks and PM ship approvals **must** go here, in the PM's words.
 - `team/briefs/NNN-slug.md`: one per task, from `_TEMPLATE.md`. One section per role.
 - `team/designs/NNN/`: the designer's mockups.
+- `team/research/`: the market researcher's full reports.
 
 If `team/` is missing, do the `/team-init` setup first (templates are in this skill's `templates/` folder).
 
@@ -55,6 +57,16 @@ If `team/` is missing, do the `/team-init` setup first (templates are in this sk
 - **Push back** if the request conflicts with an earlier decision, is far bigger than it sounds, or
   has a much cheaper version that gets 80% of the value. Say so in one or two lines, and let the PM
   choose.
+
+### 1b. Market research: for bets, not chores
+Run it for new features, new products, pricing changes, or new customer segments: anything where
+"does anyone want this?" is a real question. Skip it for bugs, polish, copy changes, and anything the PM
+says is already decided.
+- Board: `researching` → send **market-researcher** the brief path.
+- Read the summary critically. Is every claim sourced? Is confidence stated? Did it look for evidence against the idea?
+- If it recommends `build smaller`, `don't build` or `need more evidence`, or it changes the Ask,
+  **take it to the PM and stop.** Log their call in DECISIONS.
+- Copy the suggested **success metric** into the Ask's "Done looks like" (the PM can change it).
 
 ### 2. Design: UI work only
 Skip it for back-end work, bug fixes, copy changes, and anything that follows an existing pattern

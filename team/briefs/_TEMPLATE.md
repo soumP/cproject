@@ -6,6 +6,14 @@
 ## Ask (Lead, from the PM)
 What the PM wants, in their words. Why it matters. What "done" looks like.
 
+## Market research (Market Researcher)
+_For bets (new features, products, pricing, segments)._ Full report: `team/research/NNN-slug.md`
+- Recommendation: build / build smaller / don't build / need more evidence
+- Strongest reasons (sourced):
+- What we can do that competitors don't:
+- Target segment · suggested success metric:
+- Confidence:
+
 ## Design options (Designer)
 _Only for UI work._ 2–3 options, each with a mockup link (`team/designs/NNN/option-a.html`),
 one-line idea, pros and cons, and a recommendation.

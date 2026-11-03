@@ -6,6 +6,9 @@ edit it any time.
 - **What this is:** <one line>
 - **Stack:** <languages, frameworks>
 - **Where the code lives:** <main source folders>
+- **Who it's for:** <target users / customers>
+- **How it makes money (or plans to):** <free, ads, subscription, one-off…>
+- **Known competitors:** <names, if any>
 - **Conventions:** <link to README or style notes>
 
 ## Commands
