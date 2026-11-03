@@ -29,7 +29,7 @@ Lead: `plan OK` / changes requested:
 ## Dev notes (Devs, one subsection per ticket)
 ### NNN-1
 - What changed:
-- How I checked it (`typecheck` / `build` output):
+- How I checked it (checks from PROJECT.md, with output):
 - Anything the reviewer should look at:
 
 ## Code review (Architect)
@@ -37,7 +37,7 @@ Verdict: approved / changes requested
 - Findings per ticket:
 
 ## QA findings (QA)
-Tested on: http://localhost:3001 @ commit <sha>
+Tested on: <dev URL from PROJECT.md> @ commit <sha>
 | # | Severity | Steps to reproduce | Expected | Actual |
 |---|----------|--------------------|----------|--------|
 
