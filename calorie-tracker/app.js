@@ -34,6 +34,14 @@
     { name: "Cookie", kcal: 80, emoji: "🍪" },
   ];
 
+  const THEMES = [
+    { id: "mint", label: "Mint", color: "#4cc49a" },
+    { id: "sky", label: "Sky", color: "#5aa9f0" },
+    { id: "sunny", label: "Sunny", color: "#f2a42a" },
+    { id: "lavender", label: "Lavender", color: "#9b85f0" },
+    { id: "pink", label: "Pink", color: "#ff8fab" },
+  ];
+
   const ITEMS = [
     { id: "bow", name: "Bow", emoji: "🎀", slot: "head", level: 2 },
     { id: "glasses", name: "Specs", emoji: "👓", slot: "face", level: 3 },
@@ -65,7 +73,7 @@
   const $ = (id) => document.getElementById(id);
 
   // ---------- storage ----------
-  const freshState = () => ({ pet: null, goal: 2000, equipped: { head: null, face: null, neck: null }, days: {} });
+  const freshState = () => ({ pet: null, goal: 2000, theme: "mint", equipped: { head: null, face: null, neck: null }, days: {} });
 
   function load() {
     try {
@@ -76,6 +84,7 @@
         return {
           pet: s.pet && SPECIES.some((x) => x.id === s.pet.species) ? s.pet : null,
           goal: Number(s.goal) || base.goal,
+          theme: THEMES.some((t) => t.id === s.theme) ? s.theme : base.theme,
           equipped: { ...base.equipped, ...(s.equipped || {}) },
           days: s.days && typeof s.days === "object" ? s.days : {},
         };
@@ -94,6 +103,11 @@
   }
 
   const state = load();
+
+  function applyTheme(id) {
+    document.documentElement.dataset.accent = id;
+  }
+  applyTheme(state.theme);
 
   // ---------- dates ----------
   const keyOf = (d) =>
@@ -660,6 +674,24 @@
   // ---------- setup dialog ----------
   const setup = $("setup");
   let pickedSpecies = "cat";
+  let pickedTheme = state.theme;
+
+  function renderSwatches() {
+    const box = $("swatches");
+    box.replaceChildren();
+    for (const t of THEMES) {
+      const b = el("button", "swatch");
+      b.type = "button";
+      b.style.background = t.color;
+      b.title = t.label;
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-label", t.label);
+      b.setAttribute("aria-checked", String(t.id === pickedTheme));
+      // Preview straight away; reverted on cancel.
+      b.addEventListener("click", () => { pickedTheme = t.id; applyTheme(t.id); renderSwatches(); });
+      box.append(b);
+    }
+  }
 
   function renderSpeciesPick() {
     const box = $("speciesPick");
@@ -687,7 +719,9 @@
     $("petName").value = state.pet ? state.pet.name : "";
     $("goalInput").value = state.goal;
     $("setupCancel").hidden = first;
+    pickedTheme = state.theme;
     renderSpeciesPick();
+    renderSwatches();
     if (typeof setup.showModal === "function") setup.showModal();
     else {
       // Very old browsers: fall back to defaults.
@@ -699,7 +733,8 @@
 
   setup.addEventListener("cancel", (e) => { if (!state.pet) e.preventDefault(); });
   setup.addEventListener("close", () => {
-    if (setup.returnValue !== "save") return;
+    if (setup.returnValue !== "save") { applyTheme(state.theme); return; }
+    state.theme = pickedTheme;
     const name = $("petName").value.trim().slice(0, 16) || "Biscuit";
     const goal = Math.round(Number($("goalInput").value));
     const first = !state.pet;

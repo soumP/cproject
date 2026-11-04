@@ -4,7 +4,7 @@ A calorie tracker where you adopt a little pet, and logging your food feeds it.
 
 ## How it works
 
-- **Adopt a pal:** choose a kitty, bunny, puppy or bear, give it a name, and set your daily calorie goal. You can change these any time with ⚙️.
+- **Adopt a pal:** choose a kitty, bunny, puppy or bear, give it a name, and set your daily calorie goal. You can change these any time with ⚙️, and pick the app colour there too (mint by default, or sky, sunny, lavender or pink).
 - **Feed it:** each food you log flies from the bowl into your pet's mouth, and it munches happily. Type the food and calories, or tap a quick treat (roti, dal, chai, samosa… rough estimates).
 - **Moods:** hungry with sparkly eyes when its tummy is empty, happy and playful as you eat, proud ⭐ when you're near your goal, and sleepy when it's very full. It never gets sad or tells you off. Its thought bubble shows what it wants (🍙 food, 💧 water).
 - **Water:** tap the 8 cups to fill its water bowl.
