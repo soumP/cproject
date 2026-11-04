@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mochi Bites</title>
+  <meta name="description" content="A cute little calorie tracker with a mochi friend who reacts to your day." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1 class="brand">Mochi Bites <span aria-hidden="true">🍡</span></h1>
+      <nav class="day-nav" aria-label="Choose day">
+        <button class="icon-btn" id="prevDay" aria-label="Previous day">‹</button>
+        <button class="day-label" id="dayLabel" title="Jump to today">Today</button>
+        <button class="icon-btn" id="nextDay" aria-label="Next day">›</button>
+      </nav>
+    </header>
+
+    <!-- Hero: progress ring + mascot -->
+    <section class="card hero" aria-live="polite">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="ring-track" cx="100" cy="100" r="88" />
+          <circle class="ring-fill" id="ringFill" cx="100" cy="100" r="88" />
+        </svg>
+        <svg class="mochi" id="mochi" viewBox="0 0 120 110" role="img" aria-label="Mochi">
+          <ellipse class="mochi-shadow" cx="60" cy="102" rx="38" ry="5" />
+          <path class="mochi-body" d="M14 70 C14 30 36 14 60 14 C84 14 106 30 106 70 C106 92 86 98 60 98 C34 98 14 92 14 70 Z" />
+          <path class="mochi-shine" d="M34 34 C40 26 48 23 54 23" />
+          <ellipse class="mochi-blush" cx="34" cy="70" rx="8" ry="4.5" />
+          <ellipse class="mochi-blush" cx="86" cy="70" rx="8" ry="4.5" />
+          <g id="mochiFace"></g>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <p class="big"><span id="eaten">0</span><small> / <span id="goalText">2000</span> kcal</small></p>
+        <p class="mood" id="mood">Feed me something yummy!</p>
+        <div class="pill-row">
+          <span class="pill" id="leftPill">2000 left</span>
+          <button class="pill pill-btn" id="editGoal">🎯 Goal</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add food -->
+    <section class="card">
+      <h2>Add a bite</h2>
+      <form id="addForm" class="add-form" autocomplete="off">
+        <label class="field grow">
+          <span>Food</span>
+          <input id="foodName" name="name" type="text" maxlength="60" placeholder="e.g. strawberry yogurt" required />
+        </label>
+        <label class="field kcal-field">
+          <span>kcal</span>
+          <input id="foodKcal" name="kcal" type="number" inputmode="numeric" min="1" max="5000" placeholder="150" required />
+        </label>
+        <fieldset class="meals">
+          <legend class="sr-only">Meal</legend>
+          <label><input type="radio" name="meal" value="breakfast" /><span>🌅 Breakfast</span></label>
+          <label><input type="radio" name="meal" value="lunch" /><span>☀️ Lunch</span></label>
+          <label><input type="radio" name="meal" value="dinner" /><span>🌙 Dinner</span></label>
+          <label><input type="radio" name="meal" value="snack" /><span>🍪 Snack</span></label>
+        </fieldset>
+        <button class="btn primary" type="submit">Add +</button>
+      </form>
+      <p class="hint">Quick add <span class="muted">(rough estimates)</span></p>
+      <div class="chips" id="quickChips"></div>
+    </section>
+
+    <!-- Log -->
+    <section class="card">
+      <h2>Today's plate</h2>
+      <div id="log"></div>
+    </section>
+
+    <!-- Water -->
+    <section class="card">
+      <div class="row-between">
+        <h2>Water</h2>
+        <span class="muted" id="waterText">0 / 8 cups</span>
+      </div>
+      <div class="cups" id="cups"></div>
+    </section>
+
+    <!-- Week -->
+    <section class="card">
+      <div class="row-between">
+        <h2>This week</h2>
+        <span class="muted" id="weekAvg"></span>
+      </div>
+      <div class="week" id="week"></div>
+    </section>
+
+    <footer class="foot">Saved on this device only · Mochi believes in you 💕</footer>
+  </main>
+
+  <dialog id="goalDialog" class="dialog">
+    <form method="dialog" id="goalForm">
+      <h2>Daily goal</h2>
+      <label class="field">
+        <span>Calories per day</span>
+        <input id="goalInput" type="number" inputmode="numeric" min="800" max="6000" step="50" required />
+      </label>
+      <div class="dialog-actions">
+        <button class="btn" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
