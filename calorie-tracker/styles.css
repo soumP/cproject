@@ -61,6 +61,8 @@ body {
 }
 
 .app { max-width: 520px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 14px; }
+/* Grid items default to min-width: auto, so a long food name could stretch a card past the screen. */
+.app > * { min-width: 0; }
 
 h1, h2 { margin: 0; font-family: "Fredoka", "Nunito", sans-serif; font-weight: 700; }
 h2 { font-size: 1.2rem; margin-bottom: 12px; }
@@ -360,3 +362,42 @@ h2 { font-size: 1.2rem; margin-bottom: 12px; }
 }
 .swatch[aria-checked="true"] { box-shadow: 0 0 0 3px var(--ink); }
 .field-label { font-size: 0.8rem; color: var(--muted); font-weight: 800; margin-bottom: -4px; }
+
+/* Goal rings */
+.goals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 4px; }
+.goal { display: grid; justify-items: center; gap: 2px; text-align: center; position: relative; }
+.goal-ring { position: relative; width: 66px; height: 66px; }
+.goal-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.goal-ring .trk { fill: none; stroke: var(--soft); stroke-width: 8; }
+.goal-ring .val { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.7s cubic-bezier(.3,1.3,.5,1); }
+.goal-ring .ico { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.5rem; }
+.goal.met .goal-ring::after {
+  content: "✓"; position: absolute; right: -2px; top: -2px; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 0.8rem; font-weight: 900; display: grid; place-items: center;
+  border: 2px solid var(--card); animation: pop 0.35s ease;
+}
+.goal .g-name { font-size: 0.78rem; font-weight: 900; }
+.goal .g-val { font-size: 0.7rem; color: var(--muted); line-height: 1.2; }
+.power-badge {
+  background: linear-gradient(90deg, #ffd166, #ffb347); color: #5a3a00; font-weight: 900; font-size: 0.8rem;
+  padding: 4px 10px; border-radius: 99px; animation: pop 0.4s ease;
+}
+.water-head { margin: 4px 0 -4px; font-size: 0.9rem; }
+
+/* Move */
+.workout-types { margin-bottom: 2px; }
+.grow-btn { flex: 1 1 140px !important; }
+.steps-box { margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--line); display: grid; gap: 10px; }
+.steps-form { display: flex; gap: 10px; align-items: flex-end; }
+.steps-box p { margin: 0; }
+.goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Power-day dance */
+.pet.champion .bod { animation: dance 0.8s ease-in-out infinite; transform-origin: 100px 200px; transform-box: view-box; }
+@keyframes dance {
+  0%, 100% { transform: rotate(-6deg) translateY(0); }
+  25% { transform: rotate(0) translateY(-10px); }
+  50% { transform: rotate(6deg) translateY(0); }
+  75% { transform: rotate(0) translateY(-10px); }
+}
+.entry .prot { color: var(--muted); font-weight: 700; font-size: 0.8rem; }

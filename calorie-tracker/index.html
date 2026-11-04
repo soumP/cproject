@@ -37,22 +37,13 @@
     </section>
     <p class="speech" id="speech" aria-live="polite">…</p>
 
-    <!-- Stats -->
+    <!-- Today's goals -->
     <section class="card stats">
-      <div class="stat">
-        <span class="stat-ico">🍖</span>
-        <div class="stat-body">
-          <div class="stat-top"><b>Tummy</b><span id="tummyText">0 / 2000 kcal</span></div>
-          <div class="meter"><i id="tummyBar" class="tummy"></i></div>
-        </div>
+      <div class="row-between">
+        <h2>Today's goals</h2>
+        <span class="power-badge" id="powerBadge" hidden>🏆 Power day!</span>
       </div>
-      <div class="stat">
-        <span class="stat-ico">💧</span>
-        <div class="stat-body">
-          <div class="stat-top"><b>Water</b><span id="waterText">0 / 8 cups</span></div>
-          <div class="meter"><i id="waterBar" class="water"></i></div>
-        </div>
-      </div>
+      <div class="goals" id="goals"></div>
       <div class="stat">
         <span class="stat-ico">💖</span>
         <div class="stat-body">
@@ -67,6 +58,7 @@
           <div class="meter"><i id="xpBar" class="xp"></i></div>
         </div>
       </div>
+      <div class="stat-top water-head"><b>💧 Water</b><span id="waterText">0 / 8 cups</span></div>
       <div class="cups" id="cups" aria-label="Water cups"></div>
     </section>
 
@@ -82,6 +74,10 @@
           <span>kcal</span>
           <input id="foodKcal" type="number" inputmode="numeric" min="1" max="5000" placeholder="350" required />
         </label>
+        <label class="field kcal-field">
+          <span>Protein g</span>
+          <input id="foodProtein" type="number" inputmode="numeric" min="0" max="300" placeholder="12" />
+        </label>
         <fieldset class="meals">
           <legend class="sr-only">Meal</legend>
           <label><input type="radio" name="meal" value="breakfast" /><span>🌅 Breakfast</span></label>
@@ -93,6 +89,36 @@
       </form>
       <p class="hint">Quick treats <span class="muted">(rough estimates)</span></p>
       <div class="chips" id="quickChips"></div>
+    </section>
+
+    <!-- Move -->
+    <section class="card">
+      <h2>Move with <span id="petNameMove">your pet</span></h2>
+      <form id="workoutForm" class="add-form" autocomplete="off">
+        <fieldset class="meals workout-types" id="workoutTypes">
+          <legend class="sr-only">Workout type</legend>
+        </fieldset>
+        <label class="field grow">
+          <span>Minutes</span>
+          <input id="workoutMin" type="number" inputmode="numeric" min="1" max="600" placeholder="30" required />
+        </label>
+        <button class="btn primary grow-btn" type="submit">Add workout 💪</button>
+      </form>
+      <div class="steps-box">
+        <form id="stepsForm" class="steps-form" autocomplete="off">
+          <label class="field grow">
+            <span id="stepsLabel">👟 Steps today</span>
+            <input id="stepsInput" type="number" inputmode="numeric" min="0" max="100000" placeholder="6500" />
+          </label>
+          <button class="btn" type="submit">Save</button>
+        </form>
+        <div class="chips">
+          <button class="chip" type="button" data-steps="1000">+1,000</button>
+          <button class="chip" type="button" data-steps="2500">+2,500</button>
+          <button class="chip" type="button" data-steps="5000">+5,000</button>
+        </div>
+        <p class="muted small">Copy the number from your phone's health or fitness app. Web pages can't read your step counter.</p>
+      </div>
     </section>
 
     <!-- Diary -->
@@ -130,10 +156,24 @@
         <span>Name</span>
         <input id="petName" type="text" maxlength="16" required placeholder="Biscuit" />
       </label>
-      <label class="field">
-        <span>Daily calorie goal</span>
-        <input id="goalInput" type="number" inputmode="numeric" min="800" max="6000" step="50" required />
-      </label>
+      <div class="goal-grid">
+        <label class="field">
+          <span>🍽️ Calories / day</span>
+          <input id="goalInput" type="number" inputmode="numeric" min="800" max="6000" step="50" required />
+        </label>
+        <label class="field">
+          <span>💪 Protein g / day</span>
+          <input id="proteinGoalInput" type="number" inputmode="numeric" min="10" max="300" required />
+        </label>
+        <label class="field">
+          <span>🏃 Workout min / day</span>
+          <input id="workoutGoalInput" type="number" inputmode="numeric" min="5" max="300" step="5" required />
+        </label>
+        <label class="field">
+          <span>👟 Steps / day</span>
+          <input id="stepsGoalInput" type="number" inputmode="numeric" min="500" max="50000" step="500" required />
+        </label>
+      </div>
       <p class="field-label" id="themeLabel">App colour</p>
       <div class="swatches" id="swatches" role="radiogroup" aria-labelledby="themeLabel"></div>
       <div class="dialog-actions">

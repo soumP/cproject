@@ -21,17 +21,30 @@
 
   // Rough, typical-portion estimates. Labelled as such in the UI.
   const QUICK = [
-    { name: "Roti", kcal: 120, emoji: "🫓" },
-    { name: "Dal, 1 bowl", kcal: 180, emoji: "🍲" },
-    { name: "Rice, 1 cup", kcal: 205, emoji: "🍚" },
-    { name: "Chai", kcal: 100, emoji: "☕" },
-    { name: "Samosa", kcal: 260, emoji: "🥟" },
-    { name: "Idli × 2", kcal: 130, emoji: "🍙" },
-    { name: "Banana", kcal: 105, emoji: "🍌" },
-    { name: "Apple", kcal: 95, emoji: "🍎" },
-    { name: "Boiled egg", kcal: 78, emoji: "🥚" },
-    { name: "Pizza slice", kcal: 285, emoji: "🍕" },
-    { name: "Cookie", kcal: 80, emoji: "🍪" },
+    { name: "Roti", kcal: 120, protein: 3, emoji: "🫓" },
+    { name: "Dal, 1 bowl", kcal: 180, protein: 9, emoji: "🍲" },
+    { name: "Rice, 1 cup", kcal: 205, protein: 4, emoji: "🍚" },
+    { name: "Paneer, 100 g", kcal: 265, protein: 18, emoji: "🧀" },
+    { name: "Chicken breast, 100 g", kcal: 165, protein: 31, emoji: "🍗" },
+    { name: "Boiled egg", kcal: 78, protein: 6, emoji: "🥚" },
+    { name: "Protein shake", kcal: 120, protein: 24, emoji: "🥤" },
+    { name: "Curd, 1 bowl", kcal: 100, protein: 6, emoji: "🍦" },
+    { name: "Chai", kcal: 100, protein: 3, emoji: "☕" },
+    { name: "Samosa", kcal: 260, protein: 4, emoji: "🥟" },
+    { name: "Idli × 2", kcal: 130, protein: 4, emoji: "🍙" },
+    { name: "Banana", kcal: 105, protein: 1, emoji: "🍌" },
+    { name: "Apple", kcal: 95, protein: 0, emoji: "🍎" },
+    { name: "Pizza slice", kcal: 285, protein: 12, emoji: "🍕" },
+  ];
+
+  const WORKOUTS = [
+    { id: "walk", label: "Walk", emoji: "🚶" },
+    { id: "run", label: "Run", emoji: "🏃" },
+    { id: "gym", label: "Gym", emoji: "🏋️" },
+    { id: "yoga", label: "Yoga", emoji: "🧘" },
+    { id: "cycle", label: "Cycle", emoji: "🚴" },
+    { id: "dance", label: "Dance", emoji: "💃" },
+    { id: "sport", label: "Sport", emoji: "🏸" },
   ];
 
   const THEMES = [
@@ -49,6 +62,9 @@
     { id: "scarf", name: "Scarf", emoji: "🧣", slot: "neck", level: 5 },
     { id: "party", name: "Party hat", emoji: "🥳", slot: "head", level: 6 },
     { id: "crown", name: "Crown", emoji: "👑", slot: "head", level: 8 },
+    // Earned by hitting fitness goals rather than by level.
+    { id: "sweatband", name: "Sweatband", emoji: "🎽", slot: "head", need: { kind: "workout", n: 3, text: "3 workout days" } },
+    { id: "medal", name: "Medal", emoji: "🏅", slot: "neck", need: { kind: "power", n: 1, text: "1 power day" } },
   ];
 
   // First match wins, so specific words go before general ones.
@@ -63,7 +79,7 @@
     [/oat|cereal|granola|poha|upma/, "🥣"], [/lassi|milk/, "🥛"], [/yogurt|curd|dahi/, "🍦"],
     [/ice cream|kulfi/, "🍨"], [/cake/, "🍰"], [/cookie|biscuit/, "🍪"], [/donut/, "🍩"],
     [/chocolate|candy|laddoo|ladoo|barfi|sweet|mithai/, "🍫"],
-    [/coffee|latte|espresso|chai|tea/, "☕"], [/boba/, "🧋"], [/juice|smoothie|shake/, "🧃"],
+    [/coffee|latte|espresso|chai|tea/, "☕"], [/boba/, "🧋"], [/protein|whey/, "🥤"], [/juice|smoothie|shake/, "🧃"],
     [/apple/, "🍎"], [/banana/, "🍌"], [/strawberr|berr/, "🍓"], [/grape/, "🍇"],
     [/orange/, "🍊"], [/mango/, "🥭"], [/avocado/, "🥑"], [/melon/, "🍉"],
     [/carrot/, "🥕"], [/broccoli|veg/, "🥦"], [/corn|bhutta/, "🌽"], [/potato|aloo/, "🥔"],
@@ -73,7 +89,7 @@
   const $ = (id) => document.getElementById(id);
 
   // ---------- storage ----------
-  const freshState = () => ({ pet: null, goal: 2000, theme: "mint", equipped: { head: null, face: null, neck: null }, days: {} });
+  const freshState = () => ({ pet: null, goal: 2000, proteinGoal: 60, workoutGoal: 30, stepsGoal: 8000, theme: "mint", equipped: { head: null, face: null, neck: null }, days: {} });
 
   function load() {
     try {
@@ -84,6 +100,9 @@
         return {
           pet: s.pet && SPECIES.some((x) => x.id === s.pet.species) ? s.pet : null,
           goal: Number(s.goal) || base.goal,
+          proteinGoal: Number(s.proteinGoal) || base.proteinGoal,
+          workoutGoal: Number(s.workoutGoal) || base.workoutGoal,
+          stepsGoal: Number(s.stepsGoal) || base.stepsGoal,
           theme: THEMES.some((t) => t.id === s.theme) ? s.theme : base.theme,
           equipped: { ...base.equipped, ...(s.equipped || {}) },
           days: s.days && typeof s.days === "object" ? s.days : {},
@@ -118,20 +137,45 @@
 
   let selected = todayKey();
 
-  const day = (k) => state.days[k] || { entries: [], water: 0, pets: 0 };
+  const blankDay = () => ({ entries: [], workouts: [], water: 0, pets: 0, steps: 0 });
+  const day = (k) => ({ ...blankDay(), ...(state.days[k] || {}) });
   const ensureDay = (k) => {
-    const d = (state.days[k] ||= { entries: [], water: 0, pets: 0 });
-    d.water ||= 0; d.pets ||= 0;
+    const d = (state.days[k] ||= blankDay());
+    d.entries ||= []; d.workouts ||= []; d.water ||= 0; d.pets ||= 0; d.steps ||= 0;
     return d;
   };
   const total = (k) => day(k).entries.reduce((s, e) => s + e.kcal, 0);
+  const protein = (k) => day(k).entries.reduce((s, e) => s + (e.protein || 0), 0);
+  const workoutMin = (k) => day(k).workouts.reduce((s, w) => s + w.min, 0);
+  const steps = (k) => day(k).steps || 0;
   const goalHit = (k) => { const p = total(k) / state.goal; return p >= 0.9 && p <= 1.1; };
+  const met = (k) => ({
+    protein: protein(k) >= state.proteinGoal,
+    workout: workoutMin(k) >= state.workoutGoal,
+    steps: steps(k) >= state.stepsGoal,
+  });
+  // A power day is protein, workout and steps all done.
+  const powerDay = (k) => { const m = met(k); return m.protein && m.workout && m.steps; };
 
   // ---------- progress ----------
   function dayXP(k) {
     const d = day(k);
-    return Math.min(d.entries.length, 8) * 5 + Math.min(d.water || 0, CUPS) * 3 +
-      Math.min(d.pets || 0, 5) + (goalHit(k) ? 20 : 0);
+    const m = met(k);
+    return Math.min(d.entries.length, 8) * 5 + Math.min(d.water, CUPS) * 3 + Math.min(d.pets, 5) +
+      (goalHit(k) ? 20 : 0) + (m.protein ? 15 : 0) + (m.workout ? 15 : 0) + (m.steps ? 15 : 0) +
+      (powerDay(k) ? 25 : 0);
+  }
+
+  function achievements() {
+    const keys = Object.keys(state.days);
+    return {
+      workout: keys.filter((k) => met(k).workout).length,
+      power: keys.filter(powerDay).length,
+    };
+  }
+
+  function isUnlocked(it, lvl = levelInfo().lvl, ach = achievements()) {
+    return it.need ? ach[it.need.kind] >= it.need.n : lvl >= it.level;
   }
 
   function levelInfo() {
@@ -232,6 +276,8 @@
     sleeping: ["sleep", "flat"],
     love: ["love", "open"],
     eating: ["smile", "open"],
+    cheer: ["smile", "open"],
+    champion: ["sparkle", "open"],
   };
 
   function accessorySVG(id) {
@@ -256,6 +302,10 @@
         return `<g><path d="M74 52 L78 24 L90 40 L100 20 L110 40 L122 24 L126 52 Z" fill="#ffd166" stroke="${line}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="100" cy="42" r="4" fill="#ff6b9a"/><circle cx="84" cy="45" r="3" fill="#8cc8ff"/><circle cx="116" cy="45" r="3" fill="#8cc8ff"/></g>`;
       case "glasses":
         return `<g fill="rgba(255,255,255,0.25)" stroke="#5a4a7a" stroke-width="3"><circle cx="78" cy="96" r="15"/><circle cx="122" cy="96" r="15"/><path d="M93 94 q7 -5 14 0" fill="none"/></g>`;
+      case "sweatband":
+        return `<g stroke="${line}" stroke-width="2.5" stroke-linejoin="round"><path d="M47 80 Q100 44 153 80 L151 94 Q100 60 49 94 Z" fill="#5aa9f0"/><path d="M52 86 Q100 55 148 86" fill="none" stroke="#fff" stroke-width="3" opacity="0.85"/></g>`;
+      case "medal":
+        return `<g><path d="M84 140 L95 162 L105 162 L116 140" fill="none" stroke="#5aa9f0" stroke-width="7" stroke-linejoin="round"/><circle cx="100" cy="168" r="12" fill="#ffd166" stroke="${line}" stroke-width="2.5"/><path d="M100 160.5 l2.3 4.8 l5.2 0.6 l-3.9 3.5 l1.1 5.1 l-4.7 -2.6 l-4.7 2.6 l1.1 -5.1 l-3.9 -3.5 l5.2 -0.6 Z" fill="#fff6c9"/></g>`;
       case "scarf":
         return `<g stroke="${line}" stroke-width="2.5" stroke-linejoin="round"><path d="M58 138 Q100 166 142 138 L144 151 Q100 180 56 151 Z" fill="#ff7a7a"/><path d="M116 160 L122 188 L136 184 L130 156 Z" fill="#ff7a7a"/><path d="M70 148 l4 6 M90 156 l3 7 M110 156 l-2 7 M130 148 l-4 6" stroke="#fff" stroke-width="2.5" opacity="0.7"/></g>`;
       default:
@@ -340,15 +390,19 @@
 
     if (transient && transient.until > Date.now()) {
       if (transient.mood === "love") return { mood: "love", bubble: null, text: `${name} loves you! 💕` };
+      if (transient.mood === "cheer") return { mood: "cheer", bubble: "💪", text: "Yay, we moved! So strong 💪" };
       return { mood: "eating", bubble: null, text: "Nom nom nom…" };
     }
     if (timeOfDay() === "night" && eaten > 0) return { mood: "sleeping", bubble: "💤", text: `${name} is sleeping. Sweet dreams!` };
+    if (powerDay(k)) return { mood: "champion", bubble: "🏆", text: `Power day! ${name} is doing a happy dance 🏆` };
+    const needsMove = workoutMin(k) < state.workoutGoal && h >= 16;
     if (eaten === 0) return { mood: "hungry", bubble: "🍙", text: `${name} is hungry! Feed me something?` };
     if (p < 0.5) {
       if (water < 2 && h >= 12) return { mood: "hungry", bubble: "💧", text: `${name} is thirsty. A cup of water?` };
       return { mood: "hungry", bubble: "🍙", text: "Yummy! Still a little hungry…" };
     }
     if (p < 0.9) {
+      if (needsMove) return { mood: "happy", bubble: "👟", text: `${name} wants to go for a walk with you!` };
       if (water < 4 && h >= 14) return { mood: "happy", bubble: "💧", text: `Feeling good! ${name} wants some water.` };
       return { mood: "happy", bubble: "💕", text: `${name} is happy and playful!` };
     }
@@ -382,20 +436,38 @@
     $("waterBowl").classList.toggle("empty", !(today.water > 0));
   }
 
-  function renderStats() {
+  const RING = 2 * Math.PI * 26;
+
+  function renderGoals() {
     const k = todayKey();
     const eaten = total(k);
-    const p = eaten / state.goal;
-    const tb = $("tummyBar");
-    tb.style.width = `${Math.min(p, 1) * 100}%`;
-    tb.classList.toggle("full", p >= 0.9 && p <= 1.1);
-    tb.classList.toggle("over", p > 1.1);
-    const left = state.goal - eaten;
-    $("tummyText").textContent = `${eaten.toLocaleString()} / ${state.goal.toLocaleString()} kcal` +
-      (left >= 0 ? ` · ${left.toLocaleString()} left` : ` · ${(-left).toLocaleString()} over`);
+    const m = met(k);
+    const goals = [
+      { name: "Calories", ico: "🍽️", val: eaten, goal: state.goal, unit: "kcal", color: eaten > state.goal * 1.1 ? "var(--lilac)" : "var(--peach)", met: goalHit(k) },
+      { name: "Protein", ico: "💪", val: protein(k), goal: state.proteinGoal, unit: "g", color: "#ff8a65", met: m.protein },
+      { name: "Workout", ico: "🏃", val: workoutMin(k), goal: state.workoutGoal, unit: "min", color: "var(--accent)", met: m.workout },
+      { name: "Steps", ico: "👟", val: steps(k), goal: state.stepsGoal, unit: "", color: "var(--sky)", met: m.steps },
+    ];
+    const box = $("goals");
+    box.replaceChildren();
+    for (const g of goals) {
+      const wrap = el("div", "goal" + (g.met ? " met" : ""));
+      wrap.setAttribute("aria-label", `${g.name}: ${g.val} of ${g.goal} ${g.unit}${g.met ? ", done" : ""}`);
+      const ring = el("div", "goal-ring");
+      const frac = Math.min(g.val / g.goal, 1);
+      ring.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="trk" cx="32" cy="32" r="26"/><circle class="val" cx="32" cy="32" r="26" stroke="${g.color}" stroke-dasharray="${RING.toFixed(1)}" stroke-dashoffset="${(RING * (1 - frac)).toFixed(1)}"/></svg>`;
+      ring.append(el("span", "ico", g.ico));
+      const fmt = (n) => (n >= 10000 ? `${(n / 1000).toFixed(1)}k` : n.toLocaleString());
+      wrap.append(ring, el("span", "g-name", g.name), el("span", "g-val", `${fmt(g.val)} / ${fmt(g.goal)}${g.unit ? " " + g.unit : ""}`));
+      box.append(wrap);
+    }
+    $("powerBadge").hidden = !powerDay(k);
+  }
 
-    const w = day(k).water || 0;
-    $("waterBar").style.width = `${(w / CUPS) * 100}%`;
+  function renderStats() {
+    const k = todayKey();
+    renderGoals();
+    const w = day(k).water;
     $("waterText").textContent = `${w} / ${CUPS} cups`;
 
     const hap = happiness();
@@ -412,6 +484,7 @@
     $("streak").textContent = `🔥 ${s} day${s === 1 ? "" : "s"}`;
     $("petNameTop").textContent = petName();
     $("petNameFeed").textContent = petName();
+    $("petNameMove").textContent = petName();
 
     const cups = $("cups");
     cups.replaceChildren();
@@ -435,23 +508,53 @@
     week.replaceChildren();
     for (let i = -6; i <= 0; i++) {
       const k = shift(selected, i);
-      const logged = day(k).entries.length > 0;
+      const dk = day(k);
+      const logged = dk.entries.length > 0 || dk.workouts.length > 0 || dk.steps > 0;
       const b = el("button", "wday" + (k === selected ? " sel" : ""));
       b.type = "button";
       b.disabled = k > t;
-      const stamp = el("span", "stamp" + (logged ? "" : " blank"), goalHit(k) ? "⭐" : "🐾");
+      const stamp = el("span", "stamp" + (logged ? "" : " blank"), powerDay(k) ? "🏆" : goalHit(k) ? "⭐" : "🐾");
       b.append(stamp, el("span", "d", fromKey(k).toLocaleDateString(undefined, { weekday: "short" })));
-      b.setAttribute("aria-label", `${fromKey(k).toLocaleDateString(undefined, { weekday: "long" })}: ${total(k)} kcal${goalHit(k) ? ", goal reached" : ""}`);
+      b.setAttribute("aria-label", `${fromKey(k).toLocaleDateString(undefined, { weekday: "long" })}: ${total(k)} kcal${powerDay(k) ? ", power day" : goalHit(k) ? ", calorie goal reached" : ""}`);
       b.addEventListener("click", () => { selected = k; renderDiary(); });
       week.append(b);
     }
 
+    $("stepsLabel").textContent = `👟 Steps ${selected === t ? "today" : "· " + $("dayLabel").textContent}`;
+    $("stepsInput").value = steps(selected) || "";
+
     const log = $("log");
     log.replaceChildren();
-    const entries = day(selected).entries;
+    const sel = day(selected);
+    const entries = sel.entries;
+    const delBtn = (label, fn) => {
+      const del = el("button", "del", "×");
+      del.type = "button";
+      del.setAttribute("aria-label", `Remove ${label}`);
+      del.addEventListener("click", fn);
+      return del;
+    };
+    if (sel.workouts.length || sel.steps) {
+      const group = el("div", "meal-group");
+      const head = el("div", "meal-head");
+      head.append(el("span", null, "🏃 Movement"), el("span", null, `${workoutMin(selected)} min`));
+      group.append(head);
+      for (const w of sel.workouts) {
+        const row = el("div", "entry");
+        row.append(el("span", "emo", w.emoji), el("span", "name", w.label), el("span", "kcal", `${w.min} min`),
+          delBtn(w.label, () => removeWorkout(w.id)));
+        group.append(row);
+      }
+      if (sel.steps) {
+        const row = el("div", "entry");
+        row.append(el("span", "emo", "👟"), el("span", "name", "Steps"), el("span", "kcal", sel.steps.toLocaleString()));
+        group.append(row);
+      }
+      log.append(group);
+    }
     if (!entries.length) {
       const empty = el("div", "empty");
-      empty.append(el("span", "emo", "🍽️"), el("span", null, selected === t ? "No food yet today." : "Nothing logged this day."));
+      empty.append(el("span", "emo", "🍽️"), el("span", null, selected === t ? "No food yet today." : "No food logged this day."));
       log.append(empty);
       return;
     }
@@ -464,11 +567,9 @@
       group.append(head);
       for (const e of items) {
         const row = el("div", "entry");
-        const del = el("button", "del", "×");
-        del.type = "button";
-        del.setAttribute("aria-label", `Remove ${e.name}`);
-        del.addEventListener("click", () => removeEntry(e.id));
-        row.append(el("span", "emo", e.emoji), el("span", "name", e.name), el("span", "kcal", String(e.kcal)), del);
+        const name = el("span", "name", e.name);
+        if (e.protein) name.append(el("small", "prot", ` · ${e.protein}g protein`));
+        row.append(el("span", "emo", e.emoji), name, el("span", "kcal", String(e.kcal)), delBtn(e.name, () => removeEntry(e.id)));
         group.append(row);
       }
       log.append(group);
@@ -477,18 +578,20 @@
 
   function renderWardrobe() {
     const lvl = levelInfo().lvl;
+    const ach = achievements();
     const box = $("wardrobe");
     box.replaceChildren();
     for (const it of ITEMS) {
-      const unlocked = lvl >= it.level;
+      const unlocked = isUnlocked(it, lvl, ach);
+      const lockText = it.need ? it.need.text : `level ${it.level}`;
       const on = state.equipped[it.slot] === it.id;
       const b = el("button", "item" + (unlocked ? "" : " locked") + (on ? " on" : ""));
       b.type = "button";
-      b.append(el("span", "i-emo", it.emoji), el("span", "i-name", unlocked ? it.name : `🔒 Lv ${it.level}`));
-      b.setAttribute("aria-label", unlocked ? `${it.name}${on ? ", wearing" : ""}` : `${it.name}, unlocks at level ${it.level}`);
+      b.append(el("span", "i-emo", it.emoji), el("span", "i-name", unlocked ? it.name : it.need ? `🔒 ${it.need.text}` : `🔒 Lv ${it.level}`));
+      b.setAttribute("aria-label", unlocked ? `${it.name}${on ? ", wearing" : ""}` : `${it.name}, unlocks with ${lockText}`);
       if (unlocked) b.setAttribute("aria-pressed", String(on));
       b.addEventListener("click", () => {
-        if (!unlocked) { toast(`Reach level ${it.level} to unlock the ${it.name.toLowerCase()}`); return; }
+        if (!unlocked) { toast(`Get ${lockText} to unlock the ${it.name.toLowerCase()}`); return; }
         state.equipped[it.slot] = on ? null : it.id;
         save();
         renderWardrobe();
@@ -588,30 +691,43 @@
     }
   }
 
-  // Run an action, then celebrate any level-up it caused.
+  // Run an action, then celebrate any goals, level-ups or unlocks it caused.
   function withLevelCheck(fn) {
-    const before = levelInfo().lvl;
+    const snap = () => {
+      const k = todayKey();
+      const lvl = levelInfo().lvl;
+      const ach = achievements();
+      return { lvl, m: met(k), power: powerDay(k), unlocked: ITEMS.filter((it) => isUnlocked(it, lvl, ach)).map((it) => it.id) };
+    };
+    const b = snap();
     fn();
-    const after = levelInfo().lvl;
-    if (after > before) {
-      const unlocked = ITEMS.filter((it) => it.level > before && it.level <= after);
+    const a = snap();
+    const msgs = [];
+    let party = false;
+    if (a.power && !b.power) { msgs.push("🏆 Power day! All goals done"); party = true; }
+    else {
+      for (const [key, label] of [["protein", "💪 Protein"], ["workout", "🏃 Workout"], ["steps", "👟 Steps"]])
+        if (a.m[key] && !b.m[key]) msgs.push(`${label} goal done!`);
+    }
+    if (a.lvl > b.lvl) { msgs.push(`🎉 Level ${a.lvl}!`); party = true; }
+    const fresh = ITEMS.filter((it) => a.unlocked.includes(it.id) && !b.unlocked.includes(it.id));
+    if (fresh.length) msgs.push(`Unlocked ${fresh.map((u) => u.emoji + " " + u.name).join(", ")}`);
+    if (msgs.length) {
       setTimeout(() => {
-        confetti();
-        toast(unlocked.length
-          ? `🎉 Level ${after}! Unlocked ${unlocked.map((u) => u.emoji + " " + u.name).join(", ")}`
-          : `🎉 ${petName()} reached level ${after}!`, 3200);
+        if (party) confetti(); else hearts(4, ["✨", "⭐", "💪"]);
+        toast(msgs.join(" · "), 3400);
       }, 500);
     }
   }
 
   // ---------- actions ----------
-  function addEntry(name, kcal, meal, emoji) {
+  function addEntry(name, kcal, meal, emoji, prot = 0) {
     const emo = emoji || pickEmoji(name);
     const isToday = selected === todayKey();
     withLevelCheck(() => {
       ensureDay(selected).entries.push({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name, kcal, meal, emoji: emo,
+        name, kcal, meal, emoji: emo, protein: prot,
       });
       save();
     });
@@ -640,6 +756,46 @@
     render();
   }
 
+  function addWorkout(type, min) {
+    const isToday = selected === todayKey();
+    withLevelCheck(() => {
+      ensureDay(selected).workouts.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: type.id, label: type.label, emoji: type.emoji, min,
+      });
+      save();
+    });
+    renderStats();
+    renderDiary();
+    renderWardrobe();
+    if (!isToday) { toast(`${type.emoji} Added to ${$("dayLabel").textContent}`); return; }
+    setTransient("cheer", 1600);
+    bounce();
+    hearts(4, [type.emoji, "💪", "✨"]);
+    floatText(`+${min} min`);
+  }
+
+  function removeWorkout(id) {
+    const d = ensureDay(selected);
+    d.workouts = d.workouts.filter((w) => w.id !== id);
+    save();
+    render();
+  }
+
+  function setSteps(n) {
+    const isToday = selected === todayKey();
+    const prev = steps(selected);
+    withLevelCheck(() => {
+      ensureDay(selected).steps = Math.max(0, Math.min(100000, Math.round(n)));
+      save();
+    });
+    renderStats();
+    renderDiary();
+    renderWardrobe();
+    renderPet();
+    if (isToday && n > prev) { bounce(); hearts(3, ["👟", "✨"]); }
+  }
+
   function setWater(n) {
     const prev = day(todayKey()).water || 0;
     withLevelCheck(() => {
@@ -664,6 +820,11 @@
     hearts();
     renderStats();
     renderWardrobe();
+  }
+
+  function currentWorkout() {
+    const c = document.querySelector('input[name="wtype"]:checked');
+    return WORKOUTS.find((w) => w.id === (c ? c.value : "walk")) || WORKOUTS[0];
   }
 
   function currentMeal() {
@@ -718,6 +879,9 @@
     $("setupTitle").textContent = first ? "Adopt a pal!" : "Your pal";
     $("petName").value = state.pet ? state.pet.name : "";
     $("goalInput").value = state.goal;
+    $("proteinGoalInput").value = state.proteinGoal;
+    $("workoutGoalInput").value = state.workoutGoal;
+    $("stepsGoalInput").value = state.stepsGoal;
     $("setupCancel").hidden = first;
     pickedTheme = state.theme;
     renderSpeciesPick();
@@ -740,6 +904,10 @@
     const first = !state.pet;
     state.pet = { species: pickedSpecies, name };
     if (goal >= 800 && goal <= 6000) state.goal = goal;
+    const num = (id, lo, hi) => { const v = Math.round(Number($(id).value)); return v >= lo && v <= hi ? v : null; };
+    state.proteinGoal = num("proteinGoalInput", 10, 300) ?? state.proteinGoal;
+    state.workoutGoal = num("workoutGoalInput", 5, 300) ?? state.workoutGoal;
+    state.stepsGoal = num("stepsGoalInput", 500, 50000) ?? state.stepsGoal;
     save();
     render();
     bounce();
@@ -754,8 +922,9 @@
   for (const q of QUICK) {
     const chip = el("button", "chip");
     chip.type = "button";
-    chip.append(`${q.emoji} ${q.name} `, el("b", null, String(q.kcal)));
-    chip.addEventListener("click", () => addEntry(q.name, q.kcal, currentMeal(), q.emoji));
+    chip.append(`${q.emoji} ${q.name} `, el("b", null, `${q.kcal} · ${q.protein}g`));
+    chip.setAttribute("aria-label", `${q.name}, ${q.kcal} kcal, ${q.protein} g protein`);
+    chip.addEventListener("click", () => addEntry(q.name, q.kcal, currentMeal(), q.emoji, q.protein));
     $("quickChips").append(chip);
   }
 
@@ -764,10 +933,36 @@
     const name = $("foodName").value.trim();
     const kcal = Math.round(Number($("foodKcal").value));
     if (!name || !Number.isFinite(kcal) || kcal < 1 || kcal > 5000) return;
-    addEntry(name, kcal, currentMeal());
+    const prot = Math.max(0, Math.min(300, Math.round(Number($("foodProtein").value) || 0)));
+    addEntry(name, kcal, currentMeal(), null, prot);
     $("foodName").value = "";
     $("foodKcal").value = "";
+    $("foodProtein").value = "";
   });
+
+  WORKOUTS.forEach((w, i) => {
+    const lab = el("label");
+    const inp = el("input");
+    inp.type = "radio"; inp.name = "wtype"; inp.value = w.id; inp.checked = i === 0;
+    lab.append(inp, el("span", null, `${w.emoji} ${w.label}`));
+    $("workoutTypes").append(lab);
+  });
+
+  $("workoutForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const min = Math.round(Number($("workoutMin").value));
+    if (!Number.isFinite(min) || min < 1 || min > 600) return;
+    addWorkout(currentWorkout(), min);
+    $("workoutMin").value = "";
+  });
+
+  $("stepsForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const v = Number($("stepsInput").value);
+    if (Number.isFinite(v) && v >= 0) setSteps(v);
+  });
+  document.querySelectorAll("[data-steps]").forEach((b) =>
+    b.addEventListener("click", () => setSteps(steps(selected) + Number(b.dataset.steps))));
 
   $("petBtn").addEventListener("click", petThePet);
   $("openSettings").addEventListener("click", openSetup);
